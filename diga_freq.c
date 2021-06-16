@@ -5,8 +5,7 @@
 
 typedef struct charfreq
 {
-    int code;
-    int freq;
+    int code, freq;
 } charfreq;
 
 typedef struct list
@@ -23,7 +22,7 @@ int main()
     list *prev;
     char *line = malloc(TAM_LINE * sizeof(char));
     charfreq *vec_freq;
-    while (fgets(line, TAM_LINE, stdin))
+    while(fgets(line, TAM_LINE, stdin))
     {
 
         aux->line = line;
@@ -41,15 +40,20 @@ int main()
         aux->next = malloc(sizeof(list));
         prev = aux;
         aux = aux->next;
+
+        line = malloc(TAM_LINE * sizeof(char));
     }
 
     free(prev->next);
     prev->next = NULL;
 
+    /*
     aux = lines_list;
     while(aux != NULL){
         printf("%s",aux->line);
         aux = aux->next;
-    }
+    }*/
+
+    
 
 }
