@@ -19,11 +19,12 @@ int compare(const void *p1, const void *p2)
 
 int main()
 {
+    double time;
     char line[1002];
-    int first = 1;
+    struct CharFreq charFreq[96];
 
+    time = omp_get_wtime();
     while (fgets(line, 1002, stdin)) {
-        struct CharFreq charFreq[96];
         char *ptr;
         int i;
 
@@ -37,16 +38,15 @@ int main()
 
         qsort(charFreq, 96, sizeof(struct CharFreq), compare);
 
-        if (!first)
-            putchar('\n');
-
+        /*
         for (i = 0; i < 96; ++i) {
             if (charFreq[i].freq > 0)
                 printf("%d %d\n", charFreq[i].code, charFreq[i].freq);
-        }
+        }*/
 
-        first = 0;
     }
+    time = omp_get_wtime()-time;
 
+    printf("\n%.10lf\n",time);
     return 0;
 }

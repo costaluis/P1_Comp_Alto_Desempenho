@@ -18,6 +18,15 @@ typedef struct list
     struct list *next;
 } list;
 
+void free_memory(list * aux){
+    if(aux->next){
+        free_memory(aux->next);
+    }
+    free(aux->line);
+    free(aux->vector);
+    free(aux);
+}
+
 int compare(const void *p1, const void *p2)
 {
     charfreq *cf1 = (charfreq *)p1;
@@ -61,6 +70,9 @@ int main()
                 aux->line = line;
 
                 vec_freq = malloc(NUM_CHARS * sizeof(charfreq));
+                if(vec_freq == NULL){
+                    printf("Morri 1\n");
+                }
 
                 for (int i = 0; i < NUM_CHARS; i++)
                 {
@@ -76,19 +88,27 @@ int main()
                 }
 
                 aux->next = malloc(sizeof(list));
+                if(aux->next == NULL){
+                    printf("Morri 2\n");
+                }
+
                 prev = aux;
                 aux = aux->next;
 
                 line = malloc(TAM_LINE * sizeof(char));
+                if(line == NULL){
+                    printf("Morri 3\n");
+                }
             }
 
             free(line);
             free(prev->next);
             prev->next = NULL;
-            time = omp_get_wtime() - time;
         }
     }
+    time = omp_get_wtime() - time;
 
+    /*
     aux = lines_list;
     while (aux != NULL)
     {
@@ -107,8 +127,10 @@ int main()
             printf("\n");
         }
     }
-
+    */
     printf("\n%.10lf\n",time);
+
+    free_memory(lines_list);
 
     /*
     aux = lines_list;
