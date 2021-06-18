@@ -18,8 +18,10 @@ typedef struct list
     struct list *next;
 } list;
 
-void free_memory(list * aux){
-    if(aux->next){
+void free_memory(list *aux)
+{
+    if (aux->next)
+    {
         free_memory(aux->next);
     }
     free(aux->line);
@@ -38,40 +40,57 @@ int compare(const void *p1, const void *p2)
     return cf2->code - cf1->code;
 }
 
-void count_freq(list *elem_list)
+void count_freq(list *elem)
 {
-    for(int i=0; i<TAM_LINE; i++){
-        if(elem_list->line[i] == '\n' || elem_list->line[i] == '\0'){
+    for (int i = 0; i < TAM_LINE; i++)
+    {
+        if (elem->line[i] == '\n' || elem->line[i] == '\0')
+        {
             break;
         }
-        elem_list->vector[elem_list->line[i] - 32].freq++;
+        elem->vector[elem->line[i] - 32].freq++;
     }
 
-    qsort(elem_list->vector, NUM_CHARS, sizeof(charfreq), compare);
+    qsort(elem->vector, NUM_CHARS, sizeof(charfreq), compare);
 }
 
 int main()
 {
-    list *lines_list = malloc(sizeof(list));
-    list *aux = lines_list;
     list *prev;
-    char *line = malloc(TAM_LINE * sizeof(char));
     charfreq *vec_freq;
-    double time;
+    list *lines_list = (list *)malloc(sizeof(list));
+    if (lines_list == NULL)
+    {
+        printf("Falha na alocacao de memoria\n");
+        return 1;
+    }
+    list *aux = lines_list;
+
+    char *line = (char *)malloc(TAM_LINE * sizeof(char));
+    if (line == NULL)
+    {
+        printf("Falha na alocacao de memoria\n");
+        return 1;
+    }
+
+    
+    //double time;
 
     #pragma omp parallel num_threads(T)
     {
         #pragma omp single
         {
-            time = omp_get_wtime();
+            //time = omp_get_wtime();
             while (fgets(line, TAM_LINE, stdin))
             {
 
                 aux->line = line;
 
-                vec_freq = malloc(NUM_CHARS * sizeof(charfreq));
-                if(vec_freq == NULL){
-                    printf("Morri 1\n");
+                vec_freq = (charfreq *)malloc(NUM_CHARS * sizeof(charfreq));
+                if (vec_freq == NULL)
+                {
+                    printf("Falha na alocacao de memoria\n");
+                    return 1;
                 }
 
                 for (int i = 0; i < NUM_CHARS; i++)
@@ -82,22 +101,26 @@ int main()
 
                 aux->vector = vec_freq;
 
-                #pragma omp task
+                #pragma omp task firstprivate(aux)
                 {
                     count_freq(aux);
                 }
 
-                aux->next = malloc(sizeof(list));
-                if(aux->next == NULL){
-                    printf("Morri 2\n");
+                aux->next = (list *)malloc(sizeof(list));
+                if (aux->next == NULL)
+                {
+                    printf("Falha na alocacao de memoria\n");
+                    return 1;
                 }
 
                 prev = aux;
                 aux = aux->next;
 
-                line = malloc(TAM_LINE * sizeof(char));
-                if(line == NULL){
-                    printf("Morri 3\n");
+                line = (char *)malloc(TAM_LINE * sizeof(char));
+                if (line == NULL)
+                {
+                    printf("Falha na alocacao de memoria\n");
+                    return 1;
                 }
             }
 
@@ -106,15 +129,14 @@ int main()
             prev->next = NULL;
         }
     }
-    time = omp_get_wtime() - time;
 
-    /*
+    //time = omp_get_wtime() - time;
+
     aux = lines_list;
     while (aux != NULL)
     {
         for (int i = 0; i < NUM_CHARS; i++)
         {
-            
             if (aux->vector[i].freq)
             {
                 printf("%d %d\n", aux->vector[i].code, aux->vector[i].freq);
@@ -123,19 +145,14 @@ int main()
 
         aux = aux->next;
 
-        if(aux){
+        if (aux)
+        {
             printf("\n");
         }
     }
-    */
-    printf("\n%.10lf\n",time);
+
+    //Print para verificar tempo de execução
+    //printf("\n%.10lf\n", time);
 
     free_memory(lines_list);
-
-    /*
-    aux = lines_list;
-    while(aux != NULL){
-        printf("%s",aux->line);
-        aux = aux->next;
-    }*/
 }
