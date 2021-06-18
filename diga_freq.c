@@ -99,6 +99,8 @@ int main()
     //Variável para realizar contagem do tempo de execução
     double time;
 
+    //Rotina de leitura das linhas
+    //Realiza leitura até que encontre EOF
     while (fgets(line, TAM_LINE, stdin))
     {
         //Realiza alocação da linha lida em um elemento da lista encadeada
@@ -177,11 +179,14 @@ int main()
             time = omp_get_wtime();
 
 
-            //Enquanto houver linhas para serem lidas
+            //Percorre a lista encadeada, criando uma task para cada nó
+            //Cada nó possui uma linha e um vetor de frequência correspondente
             while(aux != NULL)
             {
+                //Diretiva task com firsprivate para garantir acesso à região de memória pela task
                 #pragma omp task firstprivate(aux)
                 {
+                //Chamada da função que será executada na task
                 count_freq(aux);
                 }
                 aux = aux->next;
@@ -196,7 +201,7 @@ int main()
 
     //Seta a variável temporária de volta à cabeça da lista encadeada para percorrê-la
     aux = lines_list;
-/*
+
     //Enquanto a lista encadeada não acabou
     while (aux != NULL)
     {
@@ -218,7 +223,7 @@ int main()
             printf("\n");
         }
     }
-*/
+
     //Impressão do tempo de execução
     printf("\n%.10lf\n", time);
 
