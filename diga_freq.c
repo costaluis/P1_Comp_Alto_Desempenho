@@ -99,85 +99,94 @@ int main()
     //Variável para realizar contagem do tempo de execução
     double time;
 
+    while (fgets(line, TAM_LINE, stdin))
+    {
+        //Realiza alocação da linha lida em um elemento da lista encadeada
+        aux->line = line;
+
+        //Aloca um vetor de frequências na memória
+        vec_freq = (charfreq *)malloc(NUM_CHARS * sizeof(charfreq));
+
+        //Verificação de alocação
+        if (vec_freq == NULL)
+        {
+            printf("Falha na alocacao de memoria\n");
+            exit(1);
+        }
+
+        //Seta os códigos e a frequência inicial dos caracteres
+        for (int i = 0; i < NUM_CHARS; i++)
+        {
+            vec_freq[i].code = i + 32;
+            vec_freq[i].freq = 0;
+        }
+
+        //Aloca o vetor de frequências no elemento da lista encadeada
+        aux->vector = vec_freq;
+
+        //Chamada da diretiva task
+        //Define uma tarefa que será executada pelas threads disponíveis
+        //Cada thread executará o cálculo de frequência de uma linha por vez
+
+        //Aloca memória para o próximo nó da lista encadeada
+        aux->next = (list *)malloc(sizeof(list));
+
+        //Verificação de alocação
+        if (aux->next == NULL)
+        {
+            printf("Falha na alocacao de memoria\n");
+            exit(1);
+        }
+
+        //Armazena o nó anterior da lista encadeada
+        prev = aux;
+
+        //Avança o nó da lista encadeada
+        aux = aux->next;
+
+        //Aloca um novo vetor de caracteres para armazenar uma nova linha
+        line = (char *)malloc(TAM_LINE * sizeof(char));
+
+        //Verificação de alocação
+        if (line == NULL)
+        {
+            printf("Falha na alocacao de memoria\n");
+            exit(1);
+        }
+    }
+
+    //Algoritmo chega aqui quando lê EOF
+    //Desaloca o vetor de caracteres que não será utilizado
+    free(line);
+
+    //Desaloca o nó que não será utilizado
+    free(prev->next);
+
+    //Seta o último nó da lista encadeada como NULL
+    prev->next = NULL;
+
     //Início da região paralela
     #pragma omp parallel num_threads(T)
     {
         //Início da região single - Executado por uma única thread
         #pragma omp single
         {
-            //Início da contagem de tempo 
+            aux = lines_list;
+
+            //Início da contagem de tempo
             time = omp_get_wtime();
 
+
             //Enquanto houver linhas para serem lidas
-            while (fgets(line, TAM_LINE, stdin))
+            while(aux != NULL)
             {
-                //Realiza alocação da linha lida em um elemento da lista encadeada
-                aux->line = line;
-
-                //Aloca um vetor de frequências na memória
-                vec_freq = (charfreq *)malloc(NUM_CHARS * sizeof(charfreq));
-
-                //Verificação de alocação
-                if (vec_freq == NULL)
-                {
-                    printf("Falha na alocacao de memoria\n");
-                    exit(1);
-                }
-
-                //Seta os códigos e a frequência inicial dos caracteres
-                for (int i = 0; i < NUM_CHARS; i++)
-                {
-                    vec_freq[i].code = i + 32;
-                    vec_freq[i].freq = 0;
-                }
-
-                //Aloca o vetor de frequências no elemento da lista encadeada
-                aux->vector = vec_freq;
-
-                //Chamada da diretiva task
-                //Define uma tarefa que será executada pelas threads disponíveis
-                //Cada thread executará o cálculo de frequência de uma linha por vez
                 #pragma omp task firstprivate(aux)
                 {
-                    count_freq(aux);
+                count_freq(aux);
                 }
-
-                //Aloca memória para o próximo nó da lista encadeada
-                aux->next = (list *)malloc(sizeof(list));
-                
-                //Verificação de alocação
-                if (aux->next == NULL)
-                {
-                    printf("Falha na alocacao de memoria\n");
-                    exit(1);
-                }
-
-                //Armazena o nó anterior da lista encadeada
-                prev = aux;
-
-                //Avança o nó da lista encadeada
                 aux = aux->next;
-
-                //Aloca um novo vetor de caracteres para armazenar uma nova linha
-                line = (char *)malloc(TAM_LINE * sizeof(char));
-
-                //Verificação de alocação
-                if (line == NULL)
-                {
-                    printf("Falha na alocacao de memoria\n");
-                    exit(1);
-                }
             }
-
-            //Algoritmo chega aqui quando lê EOF
-            //Desaloca o vetor de caracteres que não será utilizado
-            free(line);
-
-            //Desaloca o nó que não será utilizado
-            free(prev->next);
-
-            //Seta o último nó da lista encadeada como NULL
-            prev->next = NULL;
+            
         }
     }
 
@@ -187,7 +196,7 @@ int main()
 
     //Seta a variável temporária de volta à cabeça da lista encadeada para percorrê-la
     aux = lines_list;
-
+/*
     //Enquanto a lista encadeada não acabou
     while (aux != NULL)
     {
@@ -209,7 +218,7 @@ int main()
             printf("\n");
         }
     }
-
+*/
     //Impressão do tempo de execução
     printf("\n%.10lf\n", time);
 
