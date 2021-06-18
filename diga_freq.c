@@ -184,7 +184,7 @@ int main()
     //Realiza a coleta de tempo de execução
     //O tempo de execução é medido sem considerar tempo de impressão
     time = omp_get_wtime() - time;
-
+/*
     //Seta a variável temporária de volta à cabeça da lista encadeada para percorrê-la
     aux = lines_list;
 
@@ -209,7 +209,7 @@ int main()
             printf("\n");
         }
     }
-
+*/
     //Impressão do tempo de execução
     printf("\n%.10lf\n", time);
 
